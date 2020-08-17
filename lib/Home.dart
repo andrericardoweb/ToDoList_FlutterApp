@@ -12,10 +12,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List _toDoList = [];
 
-  _saveFile() async {
-    
+  Future<File> _getFile() async {
     final localDirectory = await getApplicationDocumentsDirectory();
-    var file = File("${localDirectory.path}/data.json");
+    return File("${localDirectory.path}/data.json");
+  }
+
+  _saveFile() async {
+    var file = await _getFile();
 
     //Criar dados
     Map<String, dynamic> task = Map();
@@ -25,6 +28,25 @@ class _HomeState extends State<Home> {
 
     String data = json.encode(_toDoList);
     file.writeAsString(data);
+  }
+
+  _readFile() async {
+    try {
+      final file = await _getFile();
+      return file.readAsString();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _readFile().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
   }
 
   @override
@@ -58,6 +80,7 @@ class _HomeState extends State<Home> {
                         child: Text("Salvar"),
                         onPressed: () {
                           //Criar a função de salvar
+                          _saveFile();
                           Navigator.pop(context);
                         },
                       ),
@@ -72,7 +95,7 @@ class _HomeState extends State<Home> {
                 itemCount: _toDoList.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(_toDoList[index]),
+                    title: Text(_toDoList[index]['titulo']),
                   );
                 }),
           ),
