@@ -11,20 +11,30 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List _toDoList = [];
+  TextEditingController _controllerTask = TextEditingController();
 
   Future<File> _getFile() async {
     final localDirectory = await getApplicationDocumentsDirectory();
     return File("${localDirectory.path}/data.json");
   }
 
+  _saveTask() {
+    String typedText = _controllerTask.text;
+
+    Map<String, dynamic> task = Map();
+    task["titulo"] = typedText;
+    task["completed"] = false;
+
+    setState(() {
+      _toDoList.add(task);
+    });
+
+    _saveFile();
+    _controllerTask.text = "";
+  }
+
   _saveFile() async {
     var file = await _getFile();
-
-    //Criar dados
-    Map<String, dynamic> task = Map();
-    task["titulo"] = "Ir ao mercado";
-    task["check"] = false;
-    _toDoList.add(task);
 
     String data = json.encode(_toDoList);
     file.writeAsString(data);
@@ -67,6 +77,7 @@ class _HomeState extends State<Home> {
                   return AlertDialog(
                     title: Text("Adicionar tarefa"),
                     content: TextField(
+                      controller: _controllerTask,
                       decoration:
                           InputDecoration(labelText: "Digite sua tarefa"),
                       onChanged: (text) {},
@@ -80,7 +91,7 @@ class _HomeState extends State<Home> {
                         child: Text("Salvar"),
                         onPressed: () {
                           //Criar a função de salvar
-                          _saveFile();
+                          _saveTask();
                           Navigator.pop(context);
                         },
                       ),
