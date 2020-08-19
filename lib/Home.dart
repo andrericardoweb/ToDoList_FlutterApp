@@ -22,7 +22,7 @@ class _HomeState extends State<Home> {
     String typedText = _controllerTask.text;
 
     Map<String, dynamic> task = Map();
-    task["titulo"] = typedText;
+    task["title"] = typedText;
     task["completed"] = false;
 
     setState(() {
@@ -57,6 +57,44 @@ class _HomeState extends State<Home> {
         _toDoList = json.decode(data);
       });
     });
+  }
+
+  Widget createListItem(context, index) {
+    final item = _toDoList[index]["title"];
+
+    return Dismissible(
+        key: Key(item),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) {
+          //Remove item da lista
+          _toDoList.removeAt(index);
+          _saveFile();
+        },
+        
+        background: Container(
+          color: Colors.red,
+          padding: EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Icon(
+                Icons.delete,
+                color: Colors.white,
+              )
+            ],
+          ),
+        ),
+        child: CheckboxListTile(
+          title: Text(_toDoList[index]['title']),
+          value: _toDoList[index]['completed'],
+          onChanged: (changedValue) {
+            setState(() {
+              _toDoList[index]['completed'] = changedValue;
+            });
+
+            _saveFile();
+          },
+        ));
   }
 
   @override
@@ -103,27 +141,9 @@ class _HomeState extends State<Home> {
         children: [
           Expanded(
             child: ListView.builder(
-                itemCount: _toDoList.length,
-                itemBuilder: (context, index) {
-                  
-                  /*
-                  return ListTile(
-                    title: Text(_toDoList[index]['titulo']),
-                  );
-                  */
-
-                  return CheckboxListTile(
-                    title: Text(_toDoList[index]['titulo']),
-                    value: _toDoList[index]['completed'],
-                    onChanged: (changedValue) {
-                      setState(() {
-                        _toDoList[index]['completed'] = changedValue;
-                      });
-                      
-                      _saveFile();
-                    },
-                  );
-                }),
+              itemCount: _toDoList.length,
+              itemBuilder: createListItem,
+            ),
           ),
         ],
       ),
