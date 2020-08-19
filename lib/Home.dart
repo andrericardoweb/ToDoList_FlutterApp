@@ -11,6 +11,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List _toDoList = [];
+  Map<String, dynamic> _lastTaskRemoved = Map();
+
   TextEditingController _controllerTask = TextEditingController();
 
   Future<File> _getFile() async {
@@ -60,17 +62,39 @@ class _HomeState extends State<Home> {
   }
 
   Widget createListItem(context, index) {
-    final item = _toDoList[index]["title"];
+    //final item = _toDoList[index]["title"];
 
     return Dismissible(
-        key: Key(item),
+        key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
         direction: DismissDirection.endToStart,
         onDismissed: (direction) {
+          //Recuperar último item excluído
+          _lastTaskRemoved = _toDoList[index];
+
           //Remove item da lista
           _toDoList.removeAt(index);
           _saveFile();
+
+          //snackbar
+          final snackbar = SnackBar(
+            //backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+            content: Text("Tarefa removida!"),
+            action: SnackBarAction(
+              label: "Desfazer",
+              onPressed: () {
+                //Insere novamente item removida na lista
+                setState(() {
+                  _toDoList.insert(index, _lastTaskRemoved);
+                });
+                
+                _saveFile();
+              },
+            ),
+          );
+
+          Scaffold.of(context).showSnackBar(snackbar);
         },
-        
         background: Container(
           color: Colors.red,
           padding: EdgeInsets.all(16),
