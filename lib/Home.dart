@@ -105,8 +105,23 @@ class _HomeState extends State<Home> {
             child: ListView.builder(
                 itemCount: _toDoList.length,
                 itemBuilder: (context, index) {
+                  
+                  /*
                   return ListTile(
                     title: Text(_toDoList[index]['titulo']),
+                  );
+                  */
+
+                  return CheckboxListTile(
+                    title: Text(_toDoList[index]['titulo']),
+                    value: _toDoList[index]['completed'],
+                    onChanged: (changedValue) {
+                      setState(() {
+                        _toDoList[index]['completed'] = changedValue;
+                      });
+                      
+                      _saveFile();
+                    },
                   );
                 }),
           ),
